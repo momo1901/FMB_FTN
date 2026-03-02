@@ -157,7 +157,7 @@ function addItem(){
     let table = document.querySelector("#menuTable tbody");
     let row = table.insertRow();
 
-    row.innerHTML = '
+    row.innerHTML = `
     <td>${serial++}</td>
     <td>${item["Item Name"]}</td>
     <td>${item.Price}</td>
@@ -165,7 +165,7 @@ function addItem(){
     <td>${qty}</td>
     <td>${total}</td>
     <td><button onclick="deleteRow(this,${total})">Delete</button></td>
-    ';
+    `;
 
     document.getElementById("grandTotal").innerText = grandTotal;
     document.getElementById("quantity").value="";
