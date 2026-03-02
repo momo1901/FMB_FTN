@@ -103,7 +103,7 @@ let grandTotal = 0;
 /* ---------------- AUTO LOAD EXCEL ---------------- */
 
 window.onload = function() {
-    fetch('.\ITEMLIST_MADAR.xlsx')
+    fetch('ITEMLIST_MADAR.xlsx')
     .then(response => response.arrayBuffer())
     .then(data => {
         let workbook = XLSX.read(data, {type:'array'});
