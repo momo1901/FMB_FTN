@@ -8,6 +8,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
 <style>
 body{
@@ -48,6 +50,18 @@ th{background:#f3f4f6;}
     margin-top:15px;
     font-weight:600;
 }
+
+.date-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.date-section div {
+    flex: 1;
+    min-width: 200px;
+}
 </style>
 </head>
 
@@ -55,11 +69,32 @@ th{background:#f3f4f6;}
 
 <div class="container" id="content">
 
-<h2>FAIZ AL MAWAID SYSTEM</h2>
+<div class="header">
+    <h1><u>ANJUMAN-E-FATEMI</u></h1>
+    <h2><u>FAIZ AL MAWAID AL BURHANIYAH</u></h2>
+</div>
+
+<div class="date-section">
+    <div>
+        <label>Hijri Date</label>
+        <input type="text" placeholder="Enter Hijri Date">
+    </div>
+    <div>
+        <label>English Date</label>
+        <input type="date">
+    </div>
+    <div>
+        <label>Day</label>
+        <input type="text" placeholder="Friday">
+    </div>
+</div>
 
 <br>
 
-
+<div>
+        <label>MENU :  </label>
+        <input type="text" placeholder="">
+    </div>
 <br><br>
 
 <input list="itemsList" id="itemInput" 
@@ -165,8 +200,10 @@ function addItem(){
 		return;
 	}
     let qty = parseFloat(document.getElementById("quantity").value);
-
-    let total = item.Price * qty;
+	let price = parseFloat(document.getElementById("price").value);
+	let unit = parseFloat(document.getElementById("unit").value);
+	
+    let total = price * qty;
     grandTotal += total;
 
     let table = document.querySelector("#menuTable tbody");
@@ -175,8 +212,8 @@ function addItem(){
     row.innerHTML = `
     <td>${serial++}</td>
     <td>${item["Item Name"]}</td>
-    <td>${item.Price}</td>
-    <td>${item.Unit}</td>
+    <td>${price}</td>
+    <td>${unit}</td>
     <td>${qty}</td>
     <td>${total}</td>
     <td><button onclick="deleteRow(this,${total})">Delete</button></td>
@@ -194,8 +231,97 @@ function deleteRow(btn,total){
     document.getElementById("grandTotal").innerText = grandTotal;
 }
 
-function exportPDF(){
-    html2pdf().from(document.getElementById("content")).save("Menu.pdf");
+async function exportPDF(){
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('p', 'mm', 'a4');
+
+    let today = new Date();
+    let formattedDate = today.toLocaleDateString('en-IN');
+
+    // ---- HEADER SECTION ----
+    doc.setFontSize(18);
+    doc.setFont("helvetica", "bold");
+    doc.text("ANJUMAN-E-FATEMI", 105, 20, { align: "center" });
+
+    doc.setFontSize(14);
+    doc.text("FAIZ AL MAWAID AL BURHANIYAH", 105, 28, { align: "center" });
+
+
+    // ---- LOGO (Optional) ----
+    // If you have logo.png in repo, uncomment this:
+
+    
+    let leftImg = new Image();
+	let rightImg = new Image();
+    
+	leftImg.src = "FTNLogo.png";
+	rightImg.src = "FMBLogo.png";
+	
+    doc.addImage(leftImg, "PNG", 14, 15, 25, 20);
+    doc.addImage(rightImg, "PNG", 170, 10, 25, 25);
+
+    // ---- TABLE DATA ----
+    let rows = document.querySelectorAll("#menuTable tbody tr");
+    let tableData = [];
+
+    rows.forEach(row => {
+        tableData.push([
+            row.cells[0].innerText,
+            row.cells[1].innerText,
+            row.cells[2].innerText,
+            row.cells[3].innerText,
+            row.cells[4].innerText,
+            row.cells[5].innerText
+        ]);
+    });
+
+    doc.autoTable({
+        startY: 50,
+        head: [["Sr", "Item", "Price", "Unit", "Qty", "Total"]],
+        body: tableData,
+        theme: "grid",
+        headStyles: {
+            fillColor: [230, 230, 230],
+            textColor: 0,
+            fontStyle: 'bold'
+        },
+        styles: {
+            fontSize: 10
+        }
+    });
+
+    // ---- GRAND TOTAL SECTION ----
+   let finalY = doc.lastAutoTable.finalY + 10;
+
+    doc.setFillColor(255, 255, 0); // Yellow full row
+    doc.rect(14, finalY, 182, 12, "F");
+
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+
+    doc.text(
+        "GRAND TOTAL : " + grandTotal,
+        105,
+        finalY + 8,
+        { align: "center" }
+    );
+
+    // ---- SIGNATURE SECTION ----
+    finalY += 25;
+
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+
+    doc.save("Faiz_Menu_Report.pdf");
+}
+
+function formatINR(amount) {
+    return new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        minimumFractionDigits: 2
+    }).format(amount);
 }
 
 </script>
