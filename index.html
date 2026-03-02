@@ -62,9 +62,11 @@ th{background:#f3f4f6;}
 
 <br><br>
 
-<select id="itemDropdown" onchange="autoFill()">
-<option value="">Select Item</option>
-</select>
+<input list="itemsList" id="itemInput" 
+       placeholder="Type Item Name" 
+       oninput="autoFill()">
+	   
+<datalist id="itemsList"></datalist>
 
 <input type="number" id="price" placeholder="Price">
 <input type="text" id="unit" placeholder="Unit">
@@ -132,25 +134,38 @@ function loadDropdown(){
 /* ---------------- AUTO FILL ---------------- */
 
 function autoFill(){
-    let index = document.getElementById("itemDropdown").value;
-    if(index==="") return;
+    let selectedName = document.getElementById("itemInput").value;
 
-    document.getElementById("price").value = itemsData[index]["Price"];
-    document.getElementById("unit").value = itemsData[index]["Unit"];
+    let item = itemsData.find(i => i["Item Name"] === selectedName);
+
+    if(!item) return;
+
+    document.getElementById("price").value = item["Price"];
+    document.getElementById("unit").value = item["Unit"];
+}
+
+function loadDropdown(){
+    let datalist = document.getElementById("itemsList");
+    datalist.innerHTML = "";
+
+    itemsData.forEach((item)=>{
+        datalist.innerHTML += 
+        `<option value="${item["Item Name"]}">`;
+    });
 }
 
 /* ---------------- ADD ITEM ---------------- */
 
 function addItem(){
-    let index = document.getElementById("itemDropdown").value;
+    let selectedName = document.getElementById("itemInput").value;
+	let item = itemsData.find(i => i["Item Name"] === selectedName);
+
+	if(!item){
+		alert("Please select valid item from list");
+		return;
+	}
     let qty = parseFloat(document.getElementById("quantity").value);
 
-    if(index==="" || !qty){
-        alert("Select item & quantity");
-        return;
-    }
-
-    let item = itemsData[index];
     let total = item.Price * qty;
     grandTotal += total;
 
