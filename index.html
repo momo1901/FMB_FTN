@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Menu System</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<style>
+body{
+    font-family:'Poppins',sans-serif;
+    background:linear-gradient(135deg,#1f2937,#111827);
+    padding:30px;
+}
+.container{
+    max-width:1100px;
+    margin:auto;
+    background:white;
+    padding:30px;
+    border-radius:20px;
+}
+select,input,button{
+    padding:10px;
+    border-radius:8px;
+    border:1px solid #ddd;
+}
+button{
+    background:#2563eb;
+    color:white;
+    cursor:pointer;
+}
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+}
+th,td{
+    padding:12px;
+    text-align:center;
+    border-bottom:1px solid #eee;
+}
+th{background:#f3f4f6;}
+.total{
+    text-align:right;
+    margin-top:15px;
+    font-weight:600;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container" id="content">
+
+<h2>FAIZ AL MAWAID SYSTEM</h2>
+
+<br>
+
+<input type="file" id="excelFile" accept=".xlsx">
+
+<br><br>
+
+<select id="itemDropdown" onchange="autoFill()">
+<option value="">Select Item</option>
+</select>
+
+<input type="number" id="price" placeholder="Price" readonly>
+<input type="text" id="unit" placeholder="Unit" readonly>
+<input type="number" id="quantity" placeholder="Quantity">
+
+<button onclick="addItem()">Add Item</button>
+<button onclick="exportPDF()">Export PDF</button>
+
+<table id="menuTable">
+<thead>
+<tr>
+<th>Sr</th>
+<th>Item</th>
+<th>Price</th>
+<th>Unit</th>
+<th>Qty</th>
+<th>Total</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
+<div class="total">
+Grand Total: ₹ <span id="grandTotal">0</span>
+</div>
+
+</div>
+
+<script>
+
+let itemsData = [];
+let serial = 1;
+let grandTotal = 0;
+
+document.getElementById('excelFile').addEventListener('change', function(e){
+    let reader = new FileReader();
+    reader.readAsArrayBuffer(e.target.files[0]);
+
+    reader.onload = function(e){
+        let data = new Uint8Array(e.target.result);
+        let workbook = XLSX.read(data, {type:'array'});
+        let sheet = workbook.Sheets[workbook.SheetNames[0]];
+        itemsData = XLSX.utils.sheet_to_json(sheet);
+
+        loadDropdown();
+    }
+});
+
+function loadDropdown(){
+    let dropdown = document.getElementById("itemDropdown");
+    dropdown.innerHTML = '<option value="">Select Item</option>';
+
+    itemsData.forEach((item,index)=>{
+        dropdown.innerHTML += `<option value="${index}">${item["Item Name"]}</option>`;
+    });
+}
+
+function autoFill(){
+    let index = document.getElementById("itemDropdown").value;
+    if(index==="") return;
+
+    document.getElementById("price").value = itemsData[index]["Price"];
+    document.getElementById("unit").value = itemsData[index]["Unit"];
+}
+
+function addItem(){
+    let index = document.getElementById("itemDropdown").value;
+    let qty = parseFloat(document.getElementById("quantity").value);
+
+    if(index==="" || !qty){
+        alert("Select item & quantity");
+        return;
+    }
+
+    let item = itemsData[index];
+    let total = item.Price * qty;
+    grandTotal += total;
+
+    let table = document.querySelector("#menuTable tbody");
+    let row = table.insertRow();
+
+    row.innerHTML = `
+    <td>${serial++}</td>
+    <td>${item["Item Name"]}</td>
+    <td>${item.Price}</td>
+    <td>${item.Unit}</td>
+    <td>${qty}</td>
+    <td>${total}</td>
+    <td><button onclick="deleteRow(this,${total})">Delete</button></td>
+    `;
+
+    document.getElementById("grandTotal").innerText = grandTotal;
+    document.getElementById("quantity").value="";
+}
+
+function deleteRow(btn,total){
+    btn.closest("tr").remove();
+    grandTotal -= total;
+    document.getElementById("grandTotal").innerText = grandTotal;
+}
+
+function exportPDF(){
+    html2pdf().from(document.getElementById("content")).save("Menu.pdf");
+}
+
+</script>
+
+</body>
+</html>
