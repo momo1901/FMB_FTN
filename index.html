@@ -59,7 +59,6 @@ th{background:#f3f4f6;}
 
 <br>
 
-<input type="file" id="excelFile" accept=".xlsx">
 
 <br><br>
 
@@ -67,8 +66,8 @@ th{background:#f3f4f6;}
 <option value="">Select Item</option>
 </select>
 
-<input type="number" id="price" placeholder="Price" readonly>
-<input type="text" id="unit" placeholder="Unit" readonly>
+<input type="number" id="price" placeholder="Price">
+<input type="text" id="unit" placeholder="Unit">
 <input type="number" id="quantity" placeholder="Quantity">
 
 <button onclick="addItem()">Add Item</button>
@@ -101,28 +100,36 @@ let itemsData = [];
 let serial = 1;
 let grandTotal = 0;
 
-document.getElementById('excelFile').addEventListener('change', function(e){
-    let reader = new FileReader();
-    reader.readAsArrayBuffer(e.target.files[0]);
+/* ---------------- AUTO LOAD EXCEL ---------------- */
 
-    reader.onload = function(e){
-        let data = new Uint8Array(e.target.result);
+window.onload = function() {
+    fetch('.\ITEMLIST_MADAR.xlsx')
+    .then(response => response.arrayBuffer())
+    .then(data => {
         let workbook = XLSX.read(data, {type:'array'});
         let sheet = workbook.Sheets[workbook.SheetNames[0]];
         itemsData = XLSX.utils.sheet_to_json(sheet);
-
         loadDropdown();
-    }
-});
+    })
+    .catch(error => {
+        console.error("Error loading Excel:", error);
+        alert("Unable to load items.xlsx file.");
+    });
+};
+
+/* ---------------- LOAD DROPDOWN ---------------- */
 
 function loadDropdown(){
     let dropdown = document.getElementById("itemDropdown");
     dropdown.innerHTML = '<option value="">Select Item</option>';
 
     itemsData.forEach((item,index)=>{
-        dropdown.innerHTML += `<option value="${index}">${item["Item Name"]}</option>`;
+        dropdown.innerHTML += 
+        '<option value="${index}">${item["Item Name"]}</option>';
     });
 }
+
+/* ---------------- AUTO FILL ---------------- */
 
 function autoFill(){
     let index = document.getElementById("itemDropdown").value;
@@ -131,6 +138,8 @@ function autoFill(){
     document.getElementById("price").value = itemsData[index]["Price"];
     document.getElementById("unit").value = itemsData[index]["Unit"];
 }
+
+/* ---------------- ADD ITEM ---------------- */
 
 function addItem(){
     let index = document.getElementById("itemDropdown").value;
@@ -148,7 +157,7 @@ function addItem(){
     let table = document.querySelector("#menuTable tbody");
     let row = table.insertRow();
 
-    row.innerHTML = `
+    row.innerHTML = '
     <td>${serial++}</td>
     <td>${item["Item Name"]}</td>
     <td>${item.Price}</td>
@@ -156,11 +165,13 @@ function addItem(){
     <td>${qty}</td>
     <td>${total}</td>
     <td><button onclick="deleteRow(this,${total})">Delete</button></td>
-    `;
+    ';
 
     document.getElementById("grandTotal").innerText = grandTotal;
     document.getElementById("quantity").value="";
 }
+
+/* ---------------- DELETE ---------------- */
 
 function deleteRow(btn,total){
     btn.closest("tr").remove();
