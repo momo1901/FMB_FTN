@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Menu System</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+<link rel="stylesheet" href="main/css/style.css">
+</head>
+
+<body>
+
+<div class="container" id="content">
+
+<div class="header">
+    <img src="assests/img/FMBLogo.png" class="logo left-logo">
+
+    <div class="title">
+        <h1>ANJUMAN-E-FATEMI</h1>
+        <h2>FAIZ AL MAWAID AL BURHANIYAH</h2>
+    </div>
+
+    <img src="assests/img/FTNLogo.png" class="logo right-logo">
+</div>
+
+<hr class="header-line">
+
+<div class="date-section">
+    <div class="hijri-section">
+	<label>Hijri Date</label><br>
+    <select id="hijriDay"></select>
+
+    <select id="hijriMonth">
+        <option value="MOHARRAM AL-HARAAM">MOHARRAM AL-HARAAM</option>
+        <option value="SAFAR AL-MUZAFFAR">SAFAR AL-MUZAFFAR</option>
+        <option value="RABI AL-AWWAL">RABI AL-AWWAL</option>
+        <option value="RABI AL-AAKHAR">RABI AL-AAKHAR</option>
+        <option value="JUMADA AL-ULA">JUMADA AL-ULA</option>
+        <option value="JUMADA AL-UKHRA">JUMADA AL-UKHRA</option>
+        <option value="RAJAB AL-ASAB">RAJAB AL-ASAB</option>
+        <option value="SHABAAN AL-KARIM">SHABAAN AL-KARIM</option>
+        <option value="SHEHRE RAMAZANUL MOAZZAM">SHEHRE RAMAZANUL MOAZZAM</option>
+        <option value="SHAWWAL AL-MUKARRAM">SHAWWAL AL-MUKARRAM</option>
+        <option value="ZILQADAH AL-HARAAM">ZILQADAH AL-HARAAM</option>
+        <option value="ZILHAJ AL-HARAAM">ZILHAJ AL-HARAAM</option>
+    </select>
+
+    <select id="hijriYear"></select>
+</div>
+
+
+    <div>
+        <label>English Date</label>
+		<br>
+       <input type="date" id="gregorianDate">
+		
+    </div>
+    <div>
+        <label>Day</label>
+		<br>	
+        <input type="text" id="dayName" placeholder="Day" readonly>
+    </div>
+</div>
+
+<br>
+
+<div>
+        <label>MENU :  </label>
+        <textarea id="MenuItemInput" placeholder="Enter menu item"></textarea>
+    </div>
+<br><br>
+
+<input list="itemsList" id="itemInput" 
+       placeholder="Type Item Name" 
+       oninput="autoFill()">
+	   
+<datalist id="itemsList"></datalist>
+
+<input type="number" id="price" placeholder="Price">
+<input type="text" id="unit" placeholder="Unit">
+<input type="number" id="quantity" placeholder="Quantity">
+
+<button onclick="addItem()">Add Item</button>
+<button onclick="exportPDF()">Export PDF</button>
+
+
+<div class="table-container">
+	<table id="menuTable">
+	<thead>
+	<tr>
+	<th>Sr</th>
+	<th>Item</th>
+	<th>Price</th>
+	<th>Unit</th>
+	<th>Qty</th>
+	<th>Total</th>
+	<th>Action</th>
+	</tr>
+	</thead>
+	<tbody></tbody>
+	</table>
+</div>
+<div class="total">
+Grand Total: ₹ <span id="grandTotal">0</span>
+</div>
+
+</div>
+
+
+
+
+
+<script src="main/js/script.js"></script>
+</body>
+<script>
+document.getElementById("gregorianDate")
+        .addEventListener("change", calculateDay);
+</script>
+
+
+</body>
+</html>
